@@ -278,17 +278,19 @@ class Stream<T> {
   public function skipLast()
     return skipFromEnd(1);
 
-  public function skipUntil(predicate : T -> Bool): Stream<T>
-    return filter((function() {
-      var flag = false;
-      return function(v) {
-        if(flag)
-          return true;
-        if(predicate(v))
-          return false;
-        return flag = true;
-      };
-    })());
+	public function skipUntil(predicate : T -> Bool): Stream<T>
+		return filter(intFilter(predicate));
+
+	function intFilter(predicate : T -> Bool) {
+		var flag = false;
+		return function(v) {
+			if(flag)
+				return true;
+			if(predicate(v))
+				return false;
+			return flag = true;
+		};
+	}
 
   public function take(qt: Int) {
     if(qt < 0)
@@ -333,14 +335,16 @@ class Stream<T> {
   }
 
   public function takeUntil(predicate : T -> Bool): Stream<T>
-    return filter((function() {
-      var flag = true;
-      return function(v) {
-        if(flag && predicate(v))
-          return true;
-        return flag = false;
-      };
-    })());
+    return filter(intFilter2(predicate));
+
+	function intFilter2(predicate) {
+		var flag = true;
+		return function(v) {
+			if(flag && predicate(v))
+				return true;
+			return flag = false;
+		};
+	}
 
   public function comp(compare: T -> T -> Bool): Stream<T>
     return Stream.create(function(o) {
@@ -376,7 +380,7 @@ class Stream<T> {
     });
   }
 
-  public function last<T>(): Stream<T>
+  public function last()
     return Stream.create(function(o) {
       var last = None;
       message(function(msg) switch [msg, last] {
